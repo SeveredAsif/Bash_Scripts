@@ -1,0 +1,8 @@
+1d0
+< Not Prime
+3a3
+> Prime
+5c5
+< Not Prime
+---
+> Prime
