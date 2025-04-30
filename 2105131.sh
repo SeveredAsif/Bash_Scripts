@@ -27,6 +27,7 @@ find_file(){
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
                 printLinesCommment $target_dir/$new_name
                 runAndTest $target_dir/$new_name
+                findDiff $target_dir
             fi
             #echo "Matched substring: ${BASH_REMATCH[0]}"
 
@@ -40,6 +41,7 @@ find_file(){
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
                 printLinesCommment $target_dir/$new_name
                 runAndTest $target_dir/$new_name
+                findDiff $target_dir
             fi
 
         elif [[ "$1" == *_2105*.cpp ]]; then
@@ -52,6 +54,7 @@ find_file(){
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
                 printLinesCommment $target_dir/$new_name
                 runAndTest $target_dir/$new_name
+                findDiff $target_dir
             fi
 
         elif [[ "$1" == *_2105*.java ]]; then
@@ -64,6 +67,7 @@ find_file(){
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
                 printLinesCommment $target_dir/$new_name
                 runAndTest $target_dir/$new_name
+                findDiff $target_dir
             fi
             #echo "Matched substring: ${BASH_REMATCH[0]}"
         fi 
@@ -90,6 +94,8 @@ printLinesCommment(){
 
 }
 
+#C
+
 runAndTest(){
     if [ -f "$1" ]; then
         dir_path=$(dirname "$1")  
@@ -112,6 +118,17 @@ runAndTest(){
     fi
 }
 
+findDiff(){
+    if [ -d "$1" ]; then
+        for i in "$1"/*; do
+            findDiff "$i"
+        done 
+    elif [ -f "$1" ] && [[ "$1" =~ \.txt$ ]]; then 
+        base_name=$(basename "$1")            # e.g., out1.txt
+        num=$(echo "$base_name" | grep -oP '\d+')  # Extracts digits like 1, 2, etc.
+        diff "$1" "answers/ans${num}.txt"
+    fi 
+}
 
 find_file "./submissions"
 #printLinesCommment "./tasks/C/2105228/main.c"
