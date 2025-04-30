@@ -25,6 +25,8 @@ find_file(){
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
+                printLinesCommment $target_dir/$new_name
+                runAndTest $target_dir/$new_name
             fi
             #echo "Matched substring: ${BASH_REMATCH[0]}"
 
@@ -36,6 +38,8 @@ find_file(){
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
+                printLinesCommment $target_dir/$new_name
+                runAndTest $target_dir/$new_name
             fi
 
         elif [[ "$1" == *_2105*.cpp ]]; then
@@ -46,16 +50,20 @@ find_file(){
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
+                printLinesCommment $target_dir/$new_name
+                runAndTest $target_dir/$new_name
             fi
 
         elif [[ "$1" == *_2105*.java ]]; then
             if [[ "$1" =~ (2105[0-9]+) ]]; then
                 echo "Matched substring: ${BASH_REMATCH[0]}"
-                new_name="main.Java"
-                target_dir="tasks/Java/${BASH_REMATCH[0]}"
+                new_name="Main.java"
+                target_dir="tasks/java/${BASH_REMATCH[0]}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 echo "Moved and renamed: $1 → $target_dir/$new_name"
+                printLinesCommment $target_dir/$new_name
+                runAndTest $target_dir/$new_name
             fi
             #echo "Matched substring: ${BASH_REMATCH[0]}"
         fi 
@@ -82,5 +90,30 @@ printLinesCommment(){
 
 }
 
+runAndTest(){
+    if [ -f "$1" ]; then
+        dir_path=$(dirname "$1")  
+
+        if [[ "$1" =~ \.c$ ]]; then 
+            gcc "$1" -o "$dir_path/main.out"
+            "$dir_path/main.out" < ./tests/test1.txt > "$dir_path/out1.txt"
+
+        elif [[ "$1" =~ \.cpp$ ]]; then 
+            g++ "$1" -o "$dir_path/main.out"
+            "$dir_path/main.out" < ./tests/test1.txt > "$dir_path/out1.txt"
+
+        elif [[ "$1" =~ \.java$ ]]; then
+            javac "$1"
+            java -cp "$dir_path" Main < ./tests/test1.txt > "$dir_path/out1.txt"
+
+        elif [[ "$1" =~ \.py$ ]]; then
+            python3 "$1" < ./tests/test1.txt > "$dir_path/out1.txt"
+        fi
+    fi
+}
+
+
 find_file "./submissions"
-printLinesCommment "./tasks/C/2105228/main.c"
+#printLinesCommment "./tasks/C/2105228/main.c"
+find ./submissions -type f ! -name '*.zip' -delete
+find ./submissions -type d -empty -delete
