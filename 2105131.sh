@@ -1,14 +1,63 @@
-# Check if all 4 arguments are provided
-if [ $# -ne 4 ]; then
-    echo "Usage: $0 <submission_folder> <target_folder> <test_folder> <answer_folder>"
+# Initialize flags
+verbose=false
+noexecute=false
+nolc=false
+nocc=false
+nofc=false
+
+# List to collect positional arguments
+positional_args=()
+
+# Parse options
+for arg in "$@"; do
+    case $arg in
+        -v)
+            verbose=true
+            ;;
+        -noexecute)
+            noexecute=true
+            ;;
+        -nolc)
+            nolc=true
+            ;;
+        -nocc)
+            nocc=true
+            ;;
+        -nofc)
+            nofc=true
+            ;;
+        -*)
+            echo "Unknown option: $arg"
+            exit 1
+            ;;
+        *)
+            positional_args+=("$arg")
+            ;;
+    esac
+done
+
+# Now check positional arguments
+if [ "${#positional_args[@]}" -ne 4 ]; then
+    echo "Usage: $0 [-v] [-noexecute] [-nolc] [-nocc] [-nofc] <submission_folder> <target_folder> <test_folder> <answer_folder>"
     exit 1
 fi
 
-# Assign arguments to variables
-submission_folder="$1"
-target_folder="$2"
-test_folder="$3"
-answer_folder="$4"
+# Assign positional arguments to variables
+submission_folder="${positional_args[0]}"
+target_folder="${positional_args[1]}"
+test_folder="${positional_args[2]}"
+answer_folder="${positional_args[3]}"
+
+# Example verbose log
+if $verbose; then
+    echo "submission_folder: $submission_folder"
+    echo "target_folder: $target_folder"
+    echo "test_folder: $test_folder"
+    echo "answer_folder: $answer_folder"
+    echo "Flags: verbose=$verbose noexecute=$noexecute nolc=$nolc nocc=$nocc nofc=$nofc"
+fi
+
+
 
 # Create target folder if it does not exist
 if [ ! -d "$target_folder" ]; then
@@ -26,7 +75,23 @@ fi
 result_csv="$target_folder/result.csv"
 
 [ -f "$result_csv" ] && rm "$result_csv"
-echo "student_id,student_name,language,matched,not_matched,line_count,comment_count,function_count" > "$result_csv"
+#echo "student_id,student_name,language,matched,not_matched,line_count,comment_count,function_count" > "$result_csv"
+header="student_id,student_name,language"
+if ! $noexecute; then
+    header+=",matched"
+    header+=",not_matched"
+fi
+if ! $nolc; then
+    header+=",line_count"
+fi
+if ! $nocc; then
+    header+=",comment_count"
+fi
+if ! $nofc; then
+    header+=",function_count"
+fi
+echo "$header" > "$result_csv"
+
 
 
 # A function to add data to the CSV
@@ -41,7 +106,15 @@ add_to_csv() {
     function_count=$8
 
     # Append the data to the CSV file
-    echo "$student_id,$student_name,$language,$matched,$not_matched,$line_count,$comment_count,$function_count" >> "$result_csv"
+    #echo "$student_id,$student_name,$language,$matched,$not_matched,$line_count,$comment_count,$function_count" >> "$result_csv"
+    row="$student_id,$student_name,$language"
+    $noexecute || row+=",$matched"
+    $noexecute || row+=",$not_matched"
+    $nolc || row+=",$line_count"
+    $nocc || row+=",$comment_count"
+    $nofc || row+=",$function_count"
+    echo "$row" >> "$result_csv"
+
 }
 
 # A function to extract the number of functions from the file
@@ -51,7 +124,7 @@ count_functions() {
 }
 
 for zip in "$submission_folder"/*.zip; do
-    unzip -o "$zip" -d "$submission_folder"
+    unzip -o -q "$zip" -d "$submission_folder"
 done
 
 
@@ -83,8 +156,13 @@ find_file(){
                 # Testing
                 matched=0
                 not_matched=0
-                runAndTest "$target_dir/$new_name"
-                findDiff "$target_dir"
+                if ! $noexecute; then
+                    runAndTest "$target_dir/$new_name"
+                    findDiff "$target_dir"
+                    
+                else
+                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                fi
 
                 # Add to CSV
                 add_to_csv "$student_id" "$student_name" "C" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
@@ -107,8 +185,12 @@ find_file(){
                 
                 matched=0
                 not_matched=0
-                runAndTest "$target_dir/$new_name"
-                findDiff "$target_dir"
+                if ! $noexecute; then
+                    runAndTest "$target_dir/$new_name"
+                    findDiff "$target_dir"
+                else
+                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                fi
                 
                 add_to_csv "$student_id" "$student_name" "Python" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
             fi
@@ -131,8 +213,12 @@ find_file(){
                 # Testing
                 matched=0
                 not_matched=0
-                runAndTest "$target_dir/$new_name"
-                findDiff "$target_dir"
+                if ! $noexecute; then
+                    runAndTest "$target_dir/$new_name"
+                    findDiff "$target_dir"
+                else
+                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                fi
 
                 # Add to CSV
                 add_to_csv "$student_id" "$student_name" "C++" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
@@ -155,8 +241,12 @@ find_file(){
                 
                 matched=0
                 not_matched=0
-                runAndTest "$target_dir/$new_name"
-                findDiff "$target_dir"
+                if ! $noexecute; then
+                    runAndTest "$target_dir/$new_name"
+                    findDiff "$target_dir"
+                else
+                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                fi
                 
                 add_to_csv "$student_id" "$student_name" "Java" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
             fi
