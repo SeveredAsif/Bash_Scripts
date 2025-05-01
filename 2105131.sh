@@ -48,14 +48,6 @@ target_folder="${positional_args[1]}"
 test_folder="${positional_args[2]}"
 answer_folder="${positional_args[3]}"
 
-# Example verbose log
-if $verbose; then
-    echo "submission_folder: $submission_folder"
-    echo "target_folder: $target_folder"
-    echo "test_folder: $test_folder"
-    echo "answer_folder: $answer_folder"
-    echo "Flags: verbose=$verbose noexecute=$noexecute nolc=$nolc nocc=$nocc nofc=$nofc"
-fi
 
 
 
@@ -147,6 +139,9 @@ find_file(){
                 target_dir="$target_folder/C/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
+                if $verbose; then 
+                    echo "Organizing files of $student_id"
+                fi 
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
                 # printLinesCommment $target_dir/$new_name
                 # Get counts
@@ -157,11 +152,14 @@ find_file(){
                 matched=0
                 not_matched=0
                 if ! $noexecute; then
+                    if $verbose; then 
+                        echo "Executing files of $student_id"
+                    fi
                     runAndTest "$target_dir/$new_name"
                     findDiff "$target_dir"
                     
                 else
-                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                    echo ""
                 fi
 
                 # Add to CSV
@@ -179,6 +177,9 @@ find_file(){
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
+                if $verbose; then 
+                    echo "Organizing files of $student_id"
+                fi
 
                 counts=$(printLinesCommment "$target_dir/$new_name")
                 IFS=',' read -r line_count comment_count function_count <<< "$counts"
@@ -186,10 +187,13 @@ find_file(){
                 matched=0
                 not_matched=0
                 if ! $noexecute; then
+                    if $verbose; then 
+                        echo "Executing files of $student_id"
+                    fi
                     runAndTest "$target_dir/$new_name"
                     findDiff "$target_dir"
                 else
-                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                    echo ""
                 fi
                 
                 add_to_csv "$student_id" "$student_name" "Python" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
@@ -205,6 +209,9 @@ find_file(){
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
+                if $verbose; then 
+                    echo "Organizing files of $student_id"
+                fi
                 # printLinesCommment $target_dir/$new_name
                 # Get counts
                 counts=$(printLinesCommment "$target_dir/$new_name")
@@ -214,10 +221,13 @@ find_file(){
                 matched=0
                 not_matched=0
                 if ! $noexecute; then
+                    if $verbose; then 
+                        echo "Executing files of $student_id"
+                    fi
                     runAndTest "$target_dir/$new_name"
                     findDiff "$target_dir"
                 else
-                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                    echo ""
                 fi
 
                 # Add to CSV
@@ -236,16 +246,23 @@ find_file(){
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
 
+                if $verbose; then 
+                    echo "Organizing files of $student_id"
+                fi
+
                 counts=$(printLinesCommment "$target_dir/$new_name")
                 IFS=',' read -r line_count comment_count function_count <<< "$counts"
                 
                 matched=0
                 not_matched=0
                 if ! $noexecute; then
+                    if $verbose; then 
+                        echo "Executing files of $student_id"
+                    fi
                     runAndTest "$target_dir/$new_name"
                     findDiff "$target_dir"
                 else
-                    echo "Skipping runAndTest and findDiff due to -noexecute flag"
+                    echo ""
                 fi
                 
                 add_to_csv "$student_id" "$student_name" "Java" "$matched" "$not_matched" "$line_count" "$comment_count" "$function_count"
@@ -433,3 +450,6 @@ find_file "$submission_folder"
 #printLinesCommment "./tasks/C/2105228/main.c"
 find $submission_folder -type f ! -name '*.zip' -delete
 find $submission_folder -type d -empty -delete
+if $verbose; then 
+    echo "Successful processing of all files"
+fi
