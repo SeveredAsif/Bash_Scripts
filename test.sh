@@ -129,3 +129,6 @@ done
 # Cleanup
 rm -rf extracted
 find . -type f ! -name '*.zip' -delete
+
+./2105131.sh ./Shell-Scripting-Assignment-Files/Workspace/submissions ./Shell-Scripting-Assignment-Files/Workspace/tasks ./Shell-Scripting-Assignment-Files/Workspace/tests ./Shell-Scripting-Assignment-Files/Workspace/answers
+

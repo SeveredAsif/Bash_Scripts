@@ -1,17 +1,33 @@
-cd Shell-Scripting-Assignment-Files
-cd Workspace
-cd submissions
+# Check if all 4 arguments are provided
+if [ $# -ne 4 ]; then
+    echo "Usage: $0 <submission_folder> <target_folder> <test_folder> <answer_folder>"
+    exit 1
+fi
+
+# Assign arguments to variables
+submission_folder="$1"
+target_folder="$2"
+test_folder="$3"
+answer_folder="$4"
+
+# Create target folder if it does not exist
+if [ ! -d "$target_folder" ]; then
+    mkdir -p "$target_folder"
+fi
+
+# cd Shell-Scripting-Assignment-Files
+# cd Workspace
+# cd submissions
 #files=$(ls -1 | wc -l)
 #echo $files
 
 
 # Path for the result.csv file
-result_csv="../tasks/result.csv"
+result_csv="$target_folder/result.csv"
 
-# Check if the result.csv exists, create it if it doesn't, and add the header
-if [ ! -f "$result_csv" ]; then
-    echo "student_id,student_name,language,matched,not_matched,line_count,comment_count,function_count" > "$result_csv"
-fi
+[ -f "$result_csv" ] && rm "$result_csv"
+echo "student_id,student_name,language,matched,not_matched,line_count,comment_count,function_count" > "$result_csv"
+
 
 # A function to add data to the CSV
 add_to_csv() {
@@ -25,7 +41,7 @@ add_to_csv() {
     function_count=$8
 
     # Append the data to the CSV file
-    echo "$student_id,$student_name,$language,$matched,$not_matched,$line_count,$comment_count,$function_count" >> "./tasks/result.csv"
+    echo "$student_id,$student_name,$language,$matched,$not_matched,$line_count,$comment_count,$function_count" >> "$result_csv"
 }
 
 # A function to extract the number of functions from the file
@@ -34,8 +50,9 @@ count_functions() {
     grep -oP '^\s*([a-zA-Z_][a-zA-Z0-9_]*\s+)+[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)\s*\{' "$1" | wc -l
 }
 
-unzip "*.zip"
-cd .. 
+for zip in "$submission_folder"/*.zip; do
+    unzip -o "$zip" -d "$submission_folder"
+done
 
 
 #A
@@ -54,7 +71,7 @@ find_file(){
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.c"
-                target_dir="tasks/C/${student_id}"
+                target_dir="$target_folder/C/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
@@ -80,7 +97,7 @@ find_file(){
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.py"
-                target_dir="tasks/Python/${student_id}"
+                target_dir="$target_folder/Python/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
@@ -102,7 +119,7 @@ find_file(){
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.cpp"
-                target_dir="tasks/C++/${student_id}"
+                target_dir="$target_folder/C++/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
@@ -128,7 +145,7 @@ find_file(){
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="Main.java"
-                target_dir="tasks/java/${student_id}"
+                target_dir="$target_folder/java/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
                 #echo "Moved and renamed: $1 → $target_dir/$new_name"
@@ -236,7 +253,7 @@ runAndTest(){
         fi
 
         # Now loop through all test files in the tests directory
-        for test_file in ./tests/test*.txt; do
+        for test_file in $test_folder/test*.txt; do
             # Extract the test case number from the test file name (e.g., test1.txt -> 1)
             if [[ "$test_file" =~ test([0-9]+)\.txt ]]; then
                 test_case_number="${BASH_REMATCH[1]}"  # Capture the number from the filename
@@ -263,7 +280,7 @@ findDiff() {
     for output in "$dir"/out*.txt; do
         if [[ "$output" =~ out([0-9]+)\.txt ]]; then
             num="${BASH_REMATCH[1]}"
-            diff "$output" "answers/ans${num}.txt" > "$dir/diff${num}.txt"
+            diff "$output" "$answer_folder/ans${num}.txt" > "$dir/diff${num}.txt"
             if [ -s "$dir/diff${num}.txt" ]; then
                 ((not_matched++))
             else
@@ -322,7 +339,7 @@ findDiff() {
 #     fi 
 # }
 
-find_file "./submissions"
+find_file "$submission_folder"
 #printLinesCommment "./tasks/C/2105228/main.c"
-find ./submissions -type f ! -name '*.zip' -delete
-find ./submissions -type d -empty -delete
+find $submission_folder -type f ! -name '*.zip' -delete
+find $submission_folder -type d -empty -delete
