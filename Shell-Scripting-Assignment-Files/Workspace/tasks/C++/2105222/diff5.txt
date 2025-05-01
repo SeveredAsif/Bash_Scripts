@@ -1,8 +1,0 @@
-1,3d0
-< Prime
-< Prime
-< Prime
-4a2,4
-> Not Prime
-> Not Prime
-> Prime

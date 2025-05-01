@@ -1,5 +1,0 @@
-0a1,4
-> Not Prime
-> Not Prime
-> Not Prime
-> Prime

@@ -1,8 +1,8 @@
 cd Shell-Scripting-Assignment-Files
 cd Workspace
 cd submissions
-files=$(ls -1 | wc -l)
-echo $files
+#files=$(ls -1 | wc -l)
+#echo $files
 
 
 # Path for the result.csv file
@@ -45,19 +45,19 @@ find_file(){
             find_file "$i"
         done 
     elif [ -f "$1" ] && [[ "$1" =~ \.c$|\.cpp$|\.java$|\.py$ ]]; then 
-        echo $1
+        #echo $1
         if [[ "$1" == *_2105*.c ]]; then
             # if [[ "$1" =~ (2105[0-9]+) ]]; then
             if [[ "$1" =~ .*/([^/_]+)_[^/_]+_submission_(2105[0-9]+)/.*\.c$ ]]; then
-                echo ImhereASSSWELLLL
-                echo "Matched substring: ${BASH_REMATCH[0]}"
+                #echo ImhereASSSWELLLL
+                #echo "Matched substring: ${BASH_REMATCH[0]}"
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.c"
                 target_dir="tasks/C/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
-                echo "Moved and renamed: $1 → $target_dir/$new_name"
+                #echo "Moved and renamed: $1 → $target_dir/$new_name"
                 # printLinesCommment $target_dir/$new_name
                 # Get counts
                 counts=$(printLinesCommment "$target_dir/$new_name")
@@ -76,14 +76,14 @@ find_file(){
 
         elif [[ "$1" == *_2105*.py ]]; then
             if [[ "$1" =~ .*/([^/_]+)_[^/_]+_submission_(2105[0-9]+)/.*\.py$ ]]; then
-                echo "Matched substring: ${BASH_REMATCH[0]}"
+                #echo "Matched substring: ${BASH_REMATCH[0]}"
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.py"
                 target_dir="tasks/Python/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
-                echo "Moved and renamed: $1 → $target_dir/$new_name"
+                #echo "Moved and renamed: $1 → $target_dir/$new_name"
 
                 counts=$(printLinesCommment "$target_dir/$new_name")
                 IFS=',' read -r line_count comment_count function_count <<< "$counts"
@@ -98,14 +98,14 @@ find_file(){
         elif [[ "$1" == *_2105*.cpp ]]; then
             # if [[ "$1" =~ (2105[0-9]+) ]]; then
             if [[ "$1" =~ .*/([^/_]+)_[^/_]+_submission_(2105[0-9]+)/.*\.cpp$ ]]; then
-                echo "Matched substring: ${BASH_REMATCH[0]}"
+                #echo "Matched substring: ${BASH_REMATCH[0]}"
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="main.cpp"
                 target_dir="tasks/C++/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
-                echo "Moved and renamed: $1 → $target_dir/$new_name"
+                #echo "Moved and renamed: $1 → $target_dir/$new_name"
                 # printLinesCommment $target_dir/$new_name
                 # Get counts
                 counts=$(printLinesCommment "$target_dir/$new_name")
@@ -124,14 +124,14 @@ find_file(){
 
         elif [[ "$1" == *_2105*.java ]]; then
             if [[ "$1" =~ .*/([^/_]+)_[^/_]+_submission_(2105[0-9]+)/.*\.java$ ]]; then
-                echo "Matched substring: ${BASH_REMATCH[0]}"
+                #echo "Matched substring: ${BASH_REMATCH[0]}"
                 student_name="${BASH_REMATCH[1]}"
                 student_id="${BASH_REMATCH[2]}"
                 new_name="Main.java"
                 target_dir="tasks/java/${student_id}"
                 mkdir -p "$target_dir"  # make sure the directory exists
                 mv "$1" "$target_dir/$new_name"
-                echo "Moved and renamed: $1 → $target_dir/$new_name"
+                #echo "Moved and renamed: $1 → $target_dir/$new_name"
 
                 counts=$(printLinesCommment "$target_dir/$new_name")
                 IFS=',' read -r line_count comment_count function_count <<< "$counts"
@@ -242,12 +242,14 @@ runAndTest(){
                 test_case_number="${BASH_REMATCH[1]}"  # Capture the number from the filename
 
                 # Define the output file for each test case
-                echo "Output: $test_case_number"
+                #echo "Output: $test_case_number"
                 output_file="$dir_path/out${test_case_number}.txt"
                 
                 # Run the compiled/interpreted program with the current test case input
-                if [[ "$1" =~ \.c$|\.cpp$|\.java$ ]]; then
+                if [[ "$1" =~ \.c$|\.cpp$ ]]; then
                     "$dir_path/main.out" < "$test_file" > "$output_file"
+                elif [[ "$1" =~ \.java$ ]]; then
+                    java -cp $dir_path Main < "$test_file" > "$output_file"
                 elif [[ "$1" =~ \.py$ ]]; then
                     python3 "$1" < "$test_file" > "$output_file"
                 fi
@@ -267,6 +269,7 @@ findDiff() {
             else
                 ((matched++))
             fi
+            rm "$dir/diff${num}.txt"
         fi
     done
 }
