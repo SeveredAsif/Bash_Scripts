@@ -111,8 +111,8 @@ add_to_csv() {
 
 # A function to extract the number of functions from the file
 count_functions() {
-    # Simple regex for function definitions (C/C++/Java/Python)
-    grep -oP '^\s*([a-zA-Z_][a-zA-Z0-9_]*\s+)+[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)\s*\{' "$1" | wc -l
+    # Count C/C++/Java and Python functions
+    grep -oP '^\s*(def\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)\s*:|([a-zA-Z_][a-zA-Z0-9_]*\s+)+[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)\s*\{)' "$1" | wc -l
 }
 
 for zip in "$submission_folder"/*.zip; do
